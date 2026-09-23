@@ -9,27 +9,35 @@
     .screen { display: none; }
     .active { display: block; }
     
-    /* 9人グリッド表示 */
-    .grid-9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 400px; margin: 20px auto; }
-    .grid-cell { position: relative; width: 100%; aspect-ratio: 1; }
-    .grid-cell img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: pointer; border: 4px solid transparent; box-sizing: border-box; }
+    /* 名前表示用共通スタイル */
+    .candidate-name { font-size: 12px; font-weight: bold; margin-top: 4px; color: #333; line-height: 1.2; word-break: break-all; min-height: 1.2em; }
+
+    /* 9人グリッド表示（予選用） */
+    .grid-9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 10px; max-width: 400px; margin: 20px auto; }
+    .grid-cell { position: relative; width: 100%; text-align: center; }
+    .grid-cell img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; cursor: pointer; border: 4px solid transparent; box-sizing: border-box; }
     .grid-cell img.selected { border-color: #ff6b9d; }
 
     /* 順位バッジ */
-    .rank-badge { position: absolute; top: 6px; left: 6px; background: rgba(255, 107, 157, 0.9); color: white; font-weight: bold; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .rank-badge { position: absolute; top: 6px; left: 6px; background: rgba(255, 107, 157, 0.9); color: white; font-weight: bold; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 1; }
 
     /* 本選 1対1 表示 */
-    .vs-container { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 20px auto; }
-    .vs-card { cursor: pointer; text-align: center; }
+    .vs-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; margin: 20px auto; }
+    .vs-card { cursor: pointer; text-align: center; width: 140px; }
     .vs-card img { width: 140px; height: 140px; object-fit: cover; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .vs-divider { font-size: 24px; font-weight: bold; color: #ff6b9d; }
+    .vs-divider { font-size: 24px; font-weight: bold; color: #ff6b9d; margin-top: 55px; }
 
     /* エラー/リトライ表示 */
     .error-box { background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; padding: 15px; border-radius: 8px; max-width: 400px; margin: 20px auto; }
 
+    /* 結果画面専用グリッド */
+    .result-grid-9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 10px; max-width: 400px; margin: 20px auto; }
+    .result-cell { position: relative; width: 100%; text-align: center; }
+    .result-cell img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+
     /* 10位表示エリア */
     .rank-10-container { max-width: 400px; margin: 25px auto 10px; padding-top: 15px; border-top: 2px dashed #ccc; }
-    .rank-10-card { width: 120px; margin: 10px auto; position: relative; }
+    .rank-10-card { width: 120px; margin: 10px auto; position: relative; text-align: center; }
     .rank-10-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
     .rank-10-badge { background: #666; }
 
@@ -62,7 +70,7 @@
     </div>
   </div>
 
-  <!-- 3. 予選やり直し画面（9人未満の場合） -->
+  <!-- 3. 予選やり直し画面 -->
   <div id="retry-screen" class="screen">
     <h2>予選結果</h2>
     <div class="error-box">
@@ -72,17 +80,19 @@
     <button onclick="startQualifier()">予選をやり直す</button>
   </div>
 
-  <!-- 4. 本選画面（マージソートによる二対比較） -->
+  <!-- 4. 本選画面 -->
   <div id="tournament-screen" class="screen">
     <h2>本選（順位決定戦）</h2>
     <p class="sub-info">好きな方を選んでください</p>
     <div class="vs-container">
       <div class="vs-card" onclick="resolveMatch(0)">
         <img id="vs-left">
+        <div id="vs-left-name" class="candidate-name"></div>
       </div>
       <div class="vs-divider">VS</div>
       <div class="vs-card" onclick="resolveMatch(1)">
         <img id="vs-right">
+        <div id="vs-right-name" class="candidate-name"></div>
       </div>
     </div>
     <p id="match-count" class="sub-info">対戦数: 0回目</p>
@@ -91,7 +101,7 @@
   <!-- 5. 結果画面 -->
   <div id="result-screen" class="screen">
     <h2>あなたの好き顔9選</h2>
-    <div id="result-grid" class="grid-9"></div>
+    <div id="result-grid" class="result-grid-9"></div>
 
     <!-- 10位表示 -->
     <div id="rank-10-section" class="rank-10-container">
@@ -106,8 +116,122 @@
   </div>
 
 <script>
-  const CANDIDATE_COUNT = 72;
-  const allCandidates = Array.from({length: CANDIDATE_COUNT}, (_, i) => ({ id: i + 1, img: `images/${i + 1}.jpg` }));
+
+  const NAMES = {
+    1: "BOYNEXTDOOR ソンホ",
+    2: "BOYNEXTDOOR リウ",
+    3: "BOYNEXTDOOR イハン",
+    4: "BOYNEXTDOOR ウナク",
+    5: "BOYNEXTDOOR テサン",
+    6: "Golden Child デヨル",
+    7: "Golden Child Y",
+    8: "Golden Child チャンジュン",
+    9: "Golden Child TAG",
+    10: "Golden Child スンミン",
+    11: "Golden Child ジェヒョン",
+    12: "Golden Child ドンヒョン",
+    13: "Golden Child ジュチャン",
+    14: "Golden Child ボミン",
+    15: "Golden Child ジボム",
+    16: "INFINITE ソンジョン",
+    17: "INFINITE ドンウ",
+    18: "INFINITE ウヒョン",
+    19: "INFINITE ソンギュ",
+    20: "INFINITE L",
+    21: "INFINITE ソンヨル",
+    22: "DRIPPIN ドンユン",
+    23: "DRIPPIN ミンソ",
+    24: "DRIPPIN ジュノ",
+    25: "DRIPPIN ヒョプ",
+    26: "DRIPPIN チャンウク",
+    27: "DRIPPIN ユンソン",
+    28: "BOYNEXTDOOR ジェヒョン",
+    29: "ONEUS シオン",
+    30: "ONEUS ファヌン",
+    31: "ONEUS ゴニ",
+    32: "ONEUS ソホ",
+    33: "ONEUS イド",
+    34: "EXO カイ",
+    35: "EXO スホ",
+    36: "EXO チャニョル",
+    37: "EXO ベッキョン",
+    38: "EXO セフン",
+    39: "EXO ギョンス",
+    40: "EXO レイ",
+    41: "EXO シウミン",
+    42: "THE BOYZ ヨンフン",
+    43: "THE BOYZ エリック",
+    44: "THE BOYZ ハンニョン",
+    45: "THE BOYZ ヒョンジェ",
+    46: "THE BOYZ ケビン",
+    47: "THE BOYZ サンヨン",
+    48: "THE BOYZ ジェイコブ",
+    49: "THE BOYZ Q",
+    50: "THE BOYZ ジュヨン",
+    51: "THE BOYZ ソヌ",
+    52: "NINE.i VARI",
+    53: "NINE.i ジホ",
+    54: "NINE.i ミンジュン",
+    55: "NINE.i EDEN",
+    56: "NINE.i ジェウォン",
+    57: "NINE.i VAHN",
+    58: "NINE.i テフン",
+    59: "ONF スンジュン",
+    60: "ONF ミンギュン",
+    61: "ONF ユウト",
+    62: "ONF E-TION",
+    63: "ONF ヒョジン",
+    64: "ONF WYATT",
+    65: "BTS ジン",
+    66: "BTS J-HOPE",
+    67: "BTS SUGA",
+    68: "BTS RM",
+    69: "BTS ジミン",
+    70: "BTS V",
+    71: "BTS ジョングク",
+    72: "EVNNE スンオン",
+    73: "ATEEZ ヨサン",
+    74: "ATEEZ ミンギ",
+    75: "ATEEZ ウヨン",
+    76: "ATEEZ ホンジュン",
+    77: "ATEEZ ソンファ",
+    78: "ATEEZ ユノ",
+    79: "ATEEZ サン",
+    80: "ATEEZ ジョンホ",
+    81: "Stray Kids リノ",
+    82: "Stray Kids ヒョンジン",
+    83: "Stray Kids スンミン",
+    84: "Stray Kids I.N",
+    85: "Stray Kids チャンビン",
+    86: "Stray Kids ハン",
+    87: "Stray Kids バンチャン",
+    88: "Stray Kids Felix",
+    89: "ASTRO JINJIN",
+    90: "ASTRO MJ",
+    91: "ASTRO チャウヌ",
+    92: "ASTRO ムンビン",
+    93: "ASTRO ラキ",
+    94: "ASTRO ユンサナ",
+    95: "MONSTA X ショヌ",
+    96: "MONSTA X ヒョンウォン",
+    97: "MONSTA X キヒョン",
+    98: "MONSTA X ミニョク",
+    99: "MONSTA X ジュホン",
+    100: "MONSTA X IM",
+    
+  };
+
+  // 候補人数を100人に設定
+  const CANDIDATE_COUNT = 100;
+
+  const allCandidates = Array.from({length: CANDIDATE_COUNT}, (_, i) => {
+    const id = i + 1;
+    return {
+      id: id,
+      img: `images/${id}.jpg`,
+      name: NAMES[id] || "" // 設定がない場合は空文字
+    };
+  });
   
   let qualifierGroups = [];
   let currentGroupIndex = 0;
@@ -115,11 +239,9 @@
   let selectedInGroup = [];
   let passedQualifier = [];
 
-  // 本選ソート用変数
   let resolvePromise = null;
   let totalMatchesCount = 0;
 
-  // 配列シャッフル関数
   function shuffleArray(array) {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
@@ -186,7 +308,13 @@
           selectedInGroup.push(person);
         }
       };
+
+      const nameLabel = document.createElement('div');
+      nameLabel.className = 'candidate-name';
+      nameLabel.innerText = person.name;
+
       cell.appendChild(img);
+      cell.appendChild(nameLabel);
       grid.appendChild(cell);
     });
   }
@@ -257,7 +385,10 @@
     document.getElementById('match-count').innerText = `対戦数: ${totalMatchesCount}回目`;
     
     document.getElementById('vs-left').src = candidateA.img;
+    document.getElementById('vs-left-name').innerText = candidateA.name;
+
     document.getElementById('vs-right').src = candidateB.img;
+    document.getElementById('vs-right-name').innerText = candidateB.name;
 
     return new Promise(resolve => {
       resolvePromise = (selectedIndex) => {
@@ -278,7 +409,7 @@
     const top9 = sortedList.slice(0, 9);
     top9.forEach((person, index) => {
       const cell = document.createElement('div');
-      cell.className = 'grid-cell';
+      cell.className = 'result-cell';
 
       const img = document.createElement('img');
       img.src = person.img;
@@ -287,8 +418,13 @@
       badge.className = 'rank-badge';
       badge.innerText = index + 1;
 
+      const nameLabel = document.createElement('div');
+      nameLabel.className = 'candidate-name';
+      nameLabel.innerText = person.name;
+
       cell.appendChild(img);
       cell.appendChild(badge);
+      cell.appendChild(nameLabel);
       grid.appendChild(cell);
     });
 
@@ -303,8 +439,13 @@
       badge.className = 'rank-badge rank-10-badge';
       badge.innerText = '10';
 
+      const nameLabel = document.createElement('div');
+      nameLabel.className = 'candidate-name';
+      nameLabel.innerText = person10.name;
+
       rank10Card.appendChild(img);
       rank10Card.appendChild(badge);
+      rank10Card.appendChild(nameLabel);
       document.getElementById('rank-10-section').style.display = 'block';
     } else {
       document.getElementById('rank-10-section').style.display = 'none';
