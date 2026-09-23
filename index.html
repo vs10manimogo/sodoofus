@@ -116,109 +116,29 @@
   </div>
 
 <script>
+  // 画像の読み込みエラー時に小文字(.jpg)と大文字(.JPG)を自動切り替えする処理
+  window.addEventListener('error', function(e) {
+    if (e.target.tagName === 'IMG') {
+      const img = e.target;
+      if (!img.dataset.retried) {
+        img.dataset.retried = 'true';
+        if (img.src.endsWith('.jpg')) {
+          img.src = img.src.slice(0, -4) + '.JPG';
+        } else if (img.src.endsWith('.JPG')) {
+          img.src = img.src.slice(0, -4) + '.jpg';
+        }
+      }
+    }
+  }, true);
 
+  // ==========================================
+  // 【名前の設定】画像番号に対応する名前を入力してください
+  // ==========================================
   const NAMES = {
-    1: "BOYNEXTDOOR ソンホ",
-    2: "BOYNEXTDOOR リウ",
-    3: "BOYNEXTDOOR イハン",
-    4: "BOYNEXTDOOR ウナク",
-    5: "BOYNEXTDOOR テサン",
-    6: "Golden Child デヨル",
-    7: "Golden Child Y",
-    8: "Golden Child チャンジュン",
-    9: "Golden Child TAG",
-    10: "Golden Child スンミン",
-    11: "Golden Child ジェヒョン",
-    12: "Golden Child ドンヒョン",
-    13: "Golden Child ジュチャン",
-    14: "Golden Child ボミン",
-    15: "Golden Child ジボム",
-    16: "INFINITE ソンジョン",
-    17: "INFINITE ドンウ",
-    18: "INFINITE ウヒョン",
-    19: "INFINITE ソンギュ",
-    20: "INFINITE L",
-    21: "INFINITE ソンヨル",
-    22: "DRIPPIN ドンユン",
-    23: "DRIPPIN ミンソ",
-    24: "DRIPPIN ジュノ",
-    25: "DRIPPIN ヒョプ",
-    26: "DRIPPIN チャンウク",
-    27: "DRIPPIN ユンソン",
-    28: "BOYNEXTDOOR ジェヒョン",
-    29: "ONEUS シオン",
-    30: "ONEUS ファヌン",
-    31: "ONEUS ゴニ",
-    32: "ONEUS ソホ",
-    33: "ONEUS イド",
-    34: "EXO カイ",
-    35: "EXO スホ",
-    36: "EXO チャニョル",
-    37: "EXO ベッキョン",
-    38: "EXO セフン",
-    39: "EXO ギョンス",
-    40: "EXO レイ",
-    41: "EXO シウミン",
-    42: "THE BOYZ ヨンフン",
-    43: "THE BOYZ エリック",
-    44: "THE BOYZ ハンニョン",
-    45: "THE BOYZ ヒョンジェ",
-    46: "THE BOYZ ケビン",
-    47: "THE BOYZ サンヨン",
-    48: "THE BOYZ ジェイコブ",
-    49: "THE BOYZ Q",
-    50: "THE BOYZ ジュヨン",
-    51: "THE BOYZ ソヌ",
-    52: "NINE.i VARI",
-    53: "NINE.i ジホ",
-    54: "NINE.i ミンジュン",
-    55: "NINE.i EDEN",
-    56: "NINE.i ジェウォン",
-    57: "NINE.i VAHN",
-    58: "NINE.i テフン",
-    59: "ONF スンジュン",
-    60: "ONF ミンギュン",
-    61: "ONF ユウト",
-    62: "ONF E-TION",
-    63: "ONF ヒョジン",
-    64: "ONF WYATT",
-    65: "BTS ジン",
-    66: "BTS J-HOPE",
-    67: "BTS SUGA",
-    68: "BTS RM",
-    69: "BTS ジミン",
-    70: "BTS V",
-    71: "BTS ジョングク",
-    72: "EVNNE スンオン",
-    73: "ATEEZ ヨサン",
-    74: "ATEEZ ミンギ",
-    75: "ATEEZ ウヨン",
-    76: "ATEEZ ホンジュン",
-    77: "ATEEZ ソンファ",
-    78: "ATEEZ ユノ",
-    79: "ATEEZ サン",
-    80: "ATEEZ ジョンホ",
-    81: "Stray Kids リノ",
-    82: "Stray Kids ヒョンジン",
-    83: "Stray Kids スンミン",
-    84: "Stray Kids I.N",
-    85: "Stray Kids チャンビン",
-    86: "Stray Kids ハン",
-    87: "Stray Kids バンチャン",
-    88: "Stray Kids Felix",
-    89: "ASTRO JINJIN",
-    90: "ASTRO MJ",
-    91: "ASTRO チャウヌ",
-    92: "ASTRO ムンビン",
-    93: "ASTRO ラキ",
-    94: "ASTRO ユンサナ",
-    95: "MONSTA X ショヌ",
-    96: "MONSTA X ヒョンウォン",
-    97: "MONSTA X キヒョン",
-    98: "MONSTA X ミニョク",
-    99: "MONSTA X ジュホン",
-    100: "MONSTA X IM",
-    
+    1: "名前 1",
+    2: "名前 2",
+    3: "名前 3",
+    // 1〜100番まで必要な分の名前を登録してください
   };
 
   // 候補人数を100人に設定
@@ -253,8 +173,8 @@
 
   function chunkArray(array, size) {
     const res = [];
-    for (let i = 0; i < array.length; i += size) res.push(array.slice(i, i + size));
-    return res;
+    for (let i = array.length; i > 0; i -= size) res.push(array.slice(Math.max(0, i - size), i));
+    return res.reverse();
   }
 
   function showScreen(id) {
