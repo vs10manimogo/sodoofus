@@ -251,11 +251,13 @@
     return arr;
   }
 
-  function chunkArray(array, size) {
-    const res = [];
-    for (let i = array.length; i > 0; i -= size) res.push(array.slice(Math.max(0, i - size), i));
-    return res.reverse();
+function chunkArray(array, size) {
+  const res = [];
+  for (let i = 0; i < array.length; i += size) {
+    res.push(array.slice(i, i + size));
   }
+  return res;
+}
 
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
