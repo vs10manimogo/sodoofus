@@ -27,7 +27,7 @@
     .vs-card img { width: 140px; height: 140px; object-fit: cover; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .vs-divider { font-size: 24px; font-weight: bold; color: #ff6b9d; margin-top: 55px; }
 
-    /* エラー/リトライ表示 */
+    /* エラー表示 */
     .error-box { background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; padding: 15px; border-radius: 8px; max-width: 400px; margin: 20px auto; }
 
     /* 結果画面専用グリッド */
@@ -116,21 +116,6 @@
   </div>
 
 <script>
-  // 画像の読み込みエラー時に小文字(.jpg)と大文字(.JPG)を自動切り替えする処理
-  window.addEventListener('error', function(e) {
-    if (e.target.tagName === 'IMG') {
-      const img = e.target;
-      if (!img.dataset.retried) {
-        img.dataset.retried = 'true';
-        if (img.src.endsWith('.jpg')) {
-          img.src = img.src.slice(0, -4) + '.JPG';
-        } else if (img.src.endsWith('.JPG')) {
-          img.src = img.src.slice(0, -4) + '.jpg';
-        }
-      }
-    }
-  }, true);
-
   // ==========================================
   // 【名前の設定】画像番号に対応する名前を入力してください
   // ==========================================
