@@ -5,45 +5,173 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>好き顔9選</title>
   <style>
-    body { font-family: sans-serif; text-align: center; background: #f0f0f0; margin: 0; padding: 20px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      text-align: center;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 20px 10px;
+      color: #333;
+    }
     .screen { display: none; }
     .active { display: block; }
     
-    /* 名前表示用共通スタイル */
-    .candidate-name { font-size: 12px; font-weight: bold; margin-top: 4px; color: #333; line-height: 1.2; word-break: break-all; min-height: 1.2em; }
+    /* ------------------------------------------
+       共通カードスタイル（添付画像のデザインに統一）
+    ------------------------------------------ */
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* 画像をセンター揃え */
+      box-sizing: border-box;
+      position: relative;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+    .card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px; /* 画像のフチを丸く */
+      display: block;
+      background-color: #eee;
+    }
+    .card-info {
+      width: 100%;
+      text-align: left; /* 名前とグループ名は左揃え */
+      margin-top: 8px;
+      padding: 0 2px;
+    }
+    .card-name {
+      font-size: 15px;
+      font-weight: bold;
+      color: #1a1a1a;
+      line-height: 1.25;
+      word-break: break-all;
+    }
+    .card-group {
+      font-size: 12px;
+      color: #888888;
+      margin-top: 3px;
+      word-break: break-all;
+    }
 
-    /* 9人グリッド表示（予選用） */
-    .grid-9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 10px; max-width: 400px; margin: 20px auto; }
-    .grid-cell { position: relative; width: 100%; text-align: center; }
-    .grid-cell img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; cursor: pointer; border: 4px solid transparent; box-sizing: border-box; }
-    .grid-cell img.selected { border-color: #ff6b9d; }
+    /* 選択時のハイライト枠線 */
+    .card.selected {
+      outline: 3.5px solid #ff6b9d;
+      outline-offset: -1px;
+    }
 
-    /* 順位バッジ */
-    .rank-badge { position: absolute; top: 6px; left: 6px; background: rgba(255, 107, 157, 0.9); color: white; font-weight: bold; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 1; }
+    /* バッジ（画像左上の順位・選択マーク） */
+    .badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: #7c4dff; /* 紫ベースのカラー */
+      color: white;
+      font-weight: bold;
+      font-size: 13px;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 2;
+      padding: 0 4px;
+    }
+
+    /* ------------------------------------------
+       画面ごとのレイアウト設定
+    ------------------------------------------ */
+    /* 12人グリッド表示（予選用） */
+    .grid-12 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-width: 480px;
+      margin: 20px auto;
+    }
 
     /* 本選 1対1 表示 */
-    .vs-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; margin: 20px auto; }
-    .vs-card { cursor: pointer; text-align: center; width: 140px; }
-    .vs-card img { width: 140px; height: 140px; object-fit: cover; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .vs-divider { font-size: 24px; font-weight: bold; color: #ff6b9d; margin-top: 55px; }
+    .vs-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin: 25px auto;
+      max-width: 420px;
+    }
+    .vs-container .card {
+      width: 150px;
+    }
+    .vs-divider {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ff6b9d;
+      font-style: italic;
+    }
 
-    /* エラー表示 */
-    .error-box { background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; padding: 15px; border-radius: 8px; max-width: 400px; margin: 20px auto; }
-
-    /* 結果画面専用グリッド */
-    .result-grid-9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 10px; max-width: 400px; margin: 20px auto; }
-    .result-cell { position: relative; width: 100%; text-align: center; }
-    .result-cell img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+    /* 結果画面専用グリッド (9選) */
+    .result-grid-9 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-width: 480px;
+      margin: 20px auto;
+    }
 
     /* 10位表示エリア */
-    .rank-10-container { max-width: 400px; margin: 25px auto 10px; padding-top: 15px; border-top: 2px dashed #ccc; }
-    .rank-10-card { width: 120px; margin: 10px auto; position: relative; text-align: center; }
-    .rank-10-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
-    .rank-10-badge { background: #666; }
+    .rank-10-container {
+      max-width: 480px;
+      margin: 30px auto 10px;
+      padding-top: 20px;
+      border-top: 2px dashed #ddd;
+    }
+    .rank-10-card {
+      width: 130px;
+      margin: 15px auto 0;
+    }
+    .badge-rank10 { background: #666; }
 
-    /* ボタンエリア */
-    .button-group { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
-    button { padding: 12px 24px; font-size: 16px; background: #ff6b9d; color: white; border: none; border-radius: 24px; cursor: pointer; }
+    /* エラー/警告表示 */
+    .error-box {
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+      color: #c62828;
+      padding: 15px;
+      border-radius: 12px;
+      max-width: 420px;
+      margin: 20px auto;
+    }
+
+    /* ボタン共通 */
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    button {
+      padding: 12px 28px;
+      font-size: 15px;
+      font-weight: bold;
+      background: #ff6b9d;
+      color: white;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
     button:hover { background: #e05282; }
     button.secondary { background: #757575; }
     button.secondary:hover { background: #616161; }
@@ -62,8 +190,8 @@
   <!-- 2. 予選画面 -->
   <div id="qualifier-screen" class="screen">
     <h2 id="qualifier-title">予選</h2>
-    <p>9人の中から好きな人を4人まで選んでください</p>
-    <div id="qualifier-grid" class="grid-9"></div>
+    <p class="sub-info">好きな人を0~3人まで選んでください</p>
+    <div id="qualifier-grid" class="grid-12"></div>
     <div class="button-group">
       <button id="prev-btn" class="secondary" onclick="prevQualifierGroup()">前へ</button>
       <button id="next-btn" onclick="nextQualifierGroup()">次へ</button>
@@ -85,15 +213,9 @@
     <h2>本選（順位決定戦）</h2>
     <p class="sub-info">好きな方を選んでください</p>
     <div class="vs-container">
-      <div class="vs-card" onclick="resolveMatch(0)">
-        <img id="vs-left">
-        <div id="vs-left-name" class="candidate-name"></div>
-      </div>
+      <div id="vs-left-card" class="card" onclick="resolveMatch(0)"></div>
       <div class="vs-divider">VS</div>
-      <div class="vs-card" onclick="resolveMatch(1)">
-        <img id="vs-right">
-        <div id="vs-right-name" class="candidate-name"></div>
-      </div>
+      <div id="vs-right-card" class="card" onclick="resolveMatch(1)"></div>
     </div>
     <p id="match-count" class="sub-info">対戦数: 0回目</p>
   </div>
@@ -116,120 +238,184 @@
   </div>
 
 <script>
+  // ==========================================
+  // 【名前とグループデータの設定】
+  // 1〜160番まで名前(name)とグループ(group)を設定してください
+  // ==========================================
+  const CANDIDATE_DATA = {
+    1: { name: "ソンホ", group: "BOYNEXTDOOR" },
+    2: { name: "リウ", group: "BOYNEXTDOOR" },
+    3: { name: "イハン", group: "BOYNEXTDOOR" },
+    4: { name: "ウナク", group: "BOYNEXTDOOR" },
+    5: { name: "テサン", group: "BOYNEXTDOOR" },
+    6: { name: "デヨル", group: "Golden Child" },
+    7: { name: "Y", group: "Golden Child" },
+    8: { name: "チャンジュン", group: "Golden Child" },
+    9: { name: "TAG", group: "Golden Child" },
+    10: { name: "スンミン", group: "Golden Child" },
+    11: { name: "ジェヒョン", group: "Golden Child" },
+    12: { name: "ドンヒョン", group: "Golden Child" },
+    13: { name: "ジュチャン", group: "Golden Child" },
+    14: { name: "ボミン", group: "Golden Child" },
+    15: { name: "ジボム", group: "Golden Child" },
+    16: { name: "ソンジョン", group: "INFINITE" },
+    17: { name: "ドンウ", group: "INFINITE" },
+    18: { name: "ウヒョン", group: "INFINITE" },
+    19: { name: "ソンギュ", group: "INFINITE" },
+    20: { name: "L", group: "INFINITE" },
+    21: { name: "ソンヨル", group: "INFINITE" },
+    22: { name: "ドンユン", group: "DRIPPIN" },
+    23: { name: "ミンソ", group: "DRIPPIN" },
+    24: { name: "ジュノ", group: "DRIPPIN" },
+    25: { name: "ヒョプ", group: "DRIPPIN" },
+    26: { name: "チャンウク", group: "DRIPPIN" },
+    27: { name: "ユンソン", group: "DRIPPIN" },
+    28: { name: "ジェヒョン", group: "BOYNEXTDOOR" },
+    29: { name: "シオン", group: "ONEUS" },
+    30: { name: "ファヌン", group: "ONEUS" },
+    31: { name: "ゴニ", group: "ONEUS" },
+    32: { name: "ソホ", group: "ONEUS" },
+    33: { name: "イド", group: "ONEUS" },
+    34: { name: "カイ", group: "EXO" },
+    35: { name: "スホ", group: "EXO" },
+    36: { name: "チャニョル", group: "EXO" },
+    37: { name: "ベッキョン", group: "EXO" },
+    38: { name: "セフン", group: "EXO" },
+    39: { name: "ギョンス", group: "EXO" },
+    40: { name: "レイ", group: "EXO" },
+    41: { name: "シウミン", group: "EXO" },
+    42: { name: "ヨンフン", group: "THE BOYZ" },
+    43: { name: "エリック", group: "THE BOYZ" },
+    44: { name: "ハンニョン", group: "THE BOYZ" },
+    45: { name: "ヒョンジェ", group: "THE BOYZ" },
+    46: { name: "ケビン", group: "THE BOYZ" },
+    47: { name: "サンヨン", group: "THE BOYZ" },
+    48: { name: "ジェイコブ", group: "THE BOYZ" },
+    49: { name: "Q", group: "THE BOYZ" },
+    50: { name: "ジュヨン", group: "THE BOYZ" },
+    51: { name: "ソヌ", group: "THE BOYZ" },
+    52: { name: "VARI", group: "NINE.i" },
+    53: { name: "ジホ", group: "NINE.i" },
+    54: { name: "ミンジュン", group: "NINE.i" },
+    55: { name: "EDEN", group: "NINE.i" },
+    56: { name: "ジェウォン", group: "NINE.i" },
+    57: { name: "VAHN", group: "NINE.i" },
+    58: { name: "テフン", group: "NINE.i" },
+    59: { name: "スンジュン", group: "ONF" },
+    60: { name: "ミンギュン", group: "ONF" },
+    61: { name: "ユウト", group: "ONF" },
+    62: { name: "E-TION", group: "ONF" },
+    63: { name: "ヒョジン", group: "ONF" },
+    64: { name: "WYATT", group: "ONF" },
+    65: { name: "ジン", group: "BTS" },
+    66: { name: "J-HOPE", group: "BTS" },
+    67: { name: "SUGA", group: "BTS" },
+    68: { name: "RM", group: "BTS" },
+    69: { name: "ジミン", group: "BTS" },
+    70: { name: "V", group: "BTS" },
+    71: { name: "ジョングク", group: "BTS" },
+    72: { name: "スンオン", group: "EVNNE" },
+    73: { name: "ヨサン", group: "ATEEZ" },
+    74: { name: "ミンギ", group: "ATEEZ" },
+    75: { name: "ウヨン", group: "ATEEZ" },
+    76: { name: "ホンジュン", group: "ATEEZ" },
+    77: { name: "ソンファ", group: "ATEEZ" },
+    78: { name: "ユノ", group: "ATEEZ" },
+    79: { name: "サン", group: "ATEEZ" },
+    80: { name: "ジョンホ", group: "ATEEZ" },
+    81: { name: "リノ", group: "Stray Kids" },
+    82: { name: "ヒョンジン", group: "Stray Kids" },
+    83: { name: "スンミン", group: "Stray Kids" },
+    84: { name: "I.N", group: "Stray Kids" },
+    85: { name: "チャンビン", group: "Stray Kids" },
+    86: { name: "ハン", group: "Stray Kids" },
+    87: { name: "バンチャン", group: "Stray Kids" },
+    88: { name: "Felix", group: "Stray Kids" },
+    89: { name: "JINJIN", group: "ASTRO" },
+    90: { name: "MJ", group: "ASTRO" },
+    91: { name: "チャウヌ", group: "ASTRO" },
+    92: { name: "ムンビン", group: "ASTRO" },
+    93: { name: "ラキ", group: "ASTRO" },
+    94: { name: "ユンサナ", group: "ASTRO" },
+    95: { name: "ショヌ", group: "MONSTA X" },
+    96: { name: "ヒョンウォン", group: "MONSTA X" },
+    97: { name: "キヒョン", group: "MONSTA X" },
+    98: { name: "ミニョク", group: "MONSTA X" },
+    99: { name: "ジュホン", group: "MONSTA X" },
+    100: { name: "IM", group: "MONSTA X" },
+    101: { name: "ソンイル", group: "82MAJOR" },
+    102: { name: "ドギュン", group: "82MAJOR" },
+    103: { name: "ソンモ", group: "82MAJOR" },
+    104: { name: "ソクジュン", group: "82MAJOR" },
+    105: { name: "ソンビン", group: "82MAJOR" },
+    106: { name: "イェチャン", group: "82MAJOR" },
+    107: { name: "シオン", group: "NCT WISH" },
+    108: { name: "ユウシ", group: "NCT WISH" },
+    109: { name: "リョウ", group: "NCT WISH" },
+    110: { name: "サクヤ", group: "NCT WISH" },
+    111: { name: "ジェヒ", group: "NCT WISH" },
+    112: { name: "リク", group: "NCT WISH" },
+    113: { name: "ショウタロウ", group: "RIIZE" },
+    114: { name: "ソヒ", group: "RIIZE" },
+    115: { name: "ウンソク", group: "RIIZE" },
+    116: { name: "アントン", group: "RIIZE" },
+    117: { name: "ソンチャン", group: "RIIZE" },
+    118: { name: "ウォンビン", group: "RIIZE" },
+    119: { name: "カンダニエル", group: "" },
+    120: { name: "ライグァンリン", group: "" },
+    121: { name: "ペジニョン", group: "" },
+    122: { name: "ウジン", group: "AB6IX" },
+    123: { name: "デフィ", group: "AB6IX" },
+    124: { name: "ハソンウン", group: "" },
+    125: { name: "パクジフン", group: "" },
+    126: { name: "ユンジソン", group: "" },
+    127: { name: "オンソンウ", group: "" },
+    128: { name: "キムジェファン", group: "" },
+    129: { name: "ミニョン", group: "NU'EST" },
+    130: { name: "ハルト", group: "TREASURE" },
+    131: { name: "ジョンファン", group: "TREASURE" },
+    132: { name: "ドヨン", group: "TREASURE" },
+    133: { name: "アサヒ", group: "TREASURE" },
+    134: { name: "ヒョンソク", group: "TREASURE" },
+    135: { name: "ヨシ", group: "TREASURE" },
+    136: { name: "ジフン", group: "TREASURE" },
+    137: { name: "ジョンウ", group: "TREASURE" },
+    138: { name: "ジュンギュ", group: "TREASURE" },
+    139: { name: "ジェヒョク", group: "TREASURE" },
+    140: { name: "ヨンビン", group: "SF9" },
+    141: { name: "ユテヤン", group: "SF9" },
+    142: { name: "ダウォン", group: "SF9" },
+    143: { name: "チャニ", group: "SF9" },
+    144: { name: "フィヨン", group: "SF9" },
+    145: { name: "ロウン", group: "SF9" },
+    146: { name: "インソン", group: "SF9" },
+    147: { name: "ジェユン", group: "SF9" },
+    148: { name: "ジュホ", group: "SF9" },
+    149: { name: "ジェヒョン", group: "NCT 127" },
+    150: { name: "ドヨン", group: "NCT 127" },
+    151: { name: "ジェミン", group: "NCT DREAM" },
+    152: { name: "テヨン", group: "NCT 127" },
+    153: { name: "ユウタ", group: "NCT 127" },
+    154: { name: "ジョンウ", group: "NCT 127" },
+    155: { name: "ジャニ", group: "NCT 127" },
+    156: { name: "ヘチャン", group: "NCT 127/DREAM" },
 
-  const NAMES = {
-    1: "BOYNEXTDOOR ソンホ",
-    2: "BOYNEXTDOOR リウ",
-    3: "BOYNEXTDOOR イハン",
-    4: "BOYNEXTDOOR ウナク",
-    5: "BOYNEXTDOOR テサン",
-    6: "Golden Child デヨル",
-    7: "Golden Child Y",
-    8: "Golden Child チャンジュン",
-    9: "Golden Child TAG",
-    10: "Golden Child スンミン",
-    11: "Golden Child ジェヒョン",
-    12: "Golden Child ドンヒョン",
-    13: "Golden Child ジュチャン",
-    14: "Golden Child ボミン",
-    15: "Golden Child ジボム",
-    16: "INFINITE ソンジョン",
-    17: "INFINITE ドンウ",
-    18: "INFINITE ウヒョン",
-    19: "INFINITE ソンギュ",
-    20: "INFINITE L",
-    21: "INFINITE ソンヨル",
-    22: "DRIPPIN ドンユン",
-    23: "DRIPPIN ミンソ",
-    24: "DRIPPIN ジュノ",
-    25: "DRIPPIN ヒョプ",
-    26: "DRIPPIN チャンウク",
-    27: "DRIPPIN ユンソン",
-    28: "BOYNEXTDOOR ジェヒョン",
-    29: "ONEUS シオン",
-    30: "ONEUS ファヌン",
-    31: "ONEUS ゴニ",
-    32: "ONEUS ソホ",
-    33: "ONEUS イド",
-    34: "EXO カイ",
-    35: "EXO スホ",
-    36: "EXO チャニョル",
-    37: "EXO ベッキョン",
-    38: "EXO セフン",
-    39: "EXO ギョンス",
-    40: "EXO レイ",
-    41: "EXO シウミン",
-    42: "THE BOYZ ヨンフン",
-    43: "THE BOYZ エリック",
-    44: "THE BOYZ ハンニョン",
-    45: "THE BOYZ ヒョンジェ",
-    46: "THE BOYZ ケビン",
-    47: "THE BOYZ サンヨン",
-    48: "THE BOYZ ジェイコブ",
-    49: "THE BOYZ Q",
-    50: "THE BOYZ ジュヨン",
-    51: "THE BOYZ ソヌ",
-    52: "NINE.i VARI",
-    53: "NINE.i ジホ",
-    54: "NINE.i ミンジュン",
-    55: "NINE.i EDEN",
-    56: "NINE.i ジェウォン",
-    57: "NINE.i VAHN",
-    58: "NINE.i テフン",
-    59: "ONF スンジュン",
-    60: "ONF ミンギュン",
-    61: "ONF ユウト",
-    62: "ONF E-TION",
-    63: "ONF ヒョジン",
-    64: "ONF WYATT",
-    65: "BTS ジン",
-    66: "BTS J-HOPE",
-    67: "BTS SUGA",
-    68: "BTS RM",
-    69: "BTS ジミン",
-    70: "BTS V",
-    71: "BTS ジョングク",
-    72: "EVNNE スンオン",
-    73: "ATEEZ ヨサン",
-    74: "ATEEZ ミンギ",
-    75: "ATEEZ ウヨン",
-    76: "ATEEZ ホンジュン",
-    77: "ATEEZ ソンファ",
-    78: "ATEEZ ユノ",
-    79: "ATEEZ サン",
-    80: "ATEEZ ジョンホ",
-    81: "Stray Kids リノ",
-    82: "Stray Kids ヒョンジン",
-    83: "Stray Kids スンミン",
-    84: "Stray Kids I.N",
-    85: "Stray Kids チャンビン",
-    86: "Stray Kids ハン",
-    87: "Stray Kids バンチャン",
-    88: "Stray Kids Felix",
-    89: "ASTRO JINJIN",
-    90: "ASTRO MJ",
-    91: "ASTRO チャウヌ",
-    92: "ASTRO ムンビン",
-    93: "ASTRO ラキ",
-    94: "ASTRO ユンサナ",
-    95: "MONSTA X ショヌ",
-    96: "MONSTA X ヒョンウォン",
-    97: "MONSTA X キヒョン",
-    98: "MONSTA X ミニョク",
-    99: "MONSTA X ジュホン",
-    100: "MONSTA X IM",
-    
+    // 
   };
 
-  // 候補人数を100人に設定
-  const CANDIDATE_COUNT = 100;
+  // 定数設定
+  const CANDIDATE_COUNT = 160; // 160人に拡張
+  const GROUP_SIZE = 12;        // 予選1画面に12人表示
 
+  // 候補者配列の生成
   const allCandidates = Array.from({length: CANDIDATE_COUNT}, (_, i) => {
     const id = i + 1;
+    const data = CANDIDATE_DATA[id] || { name: `メンバー ${id}`, group: `グループ ${id}` };
     return {
       id: id,
       img: `images/${id}.jpg`,
-      name: NAMES[id] || "" // 設定がない場合は空文字
+      name: data.name,
+      group: data.group
     };
   });
   
@@ -251,23 +437,67 @@
     return arr;
   }
 
-function chunkArray(array, size) {
-  const res = [];
-  for (let i = 0; i < array.length; i += size) {
-    res.push(array.slice(i, i + size));
+  // 配列を順方向に size 個ずつ分割する正しい処理
+  function chunkArray(array, size) {
+    const res = [];
+    for (let i = 0; i < array.length; i += size) {
+      res.push(array.slice(i, i + size));
+    }
+    return res;
   }
-  return res;
-}
 
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
 
+  // 共通のカード要素生成関数
+  function createCardElement(person, options = {}) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    if (options.selected) card.classList.add('selected');
+
+    // バッジの追加（予選選択時や結果順位）
+    if (options.badgeText) {
+      const badge = document.createElement('div');
+      badge.className = 'badge';
+      if (options.badgeClass) badge.classList.add(options.badgeClass);
+      badge.innerText = options.badgeText;
+      card.appendChild(badge);
+    }
+
+    const img = document.createElement('img');
+    img.src = person.img;
+    img.alt = person.name;
+
+    const info = document.createElement('div');
+    info.className = 'card-info';
+
+    const name = document.createElement('div');
+    name.className = 'card-name';
+    name.innerText = person.name;
+
+    const group = document.createElement('div');
+    group.className = 'card-group';
+    group.innerText = person.group ? `#${person.group}` : '';
+
+    info.appendChild(name);
+    info.appendChild(group);
+
+    card.appendChild(img);
+    card.appendChild(info);
+
+    if (options.onClick) {
+      card.onclick = () => options.onClick(card, person);
+    }
+
+    return card;
+  }
+
   // --- 予選処理 ---
   function startQualifier() {
     const shuffled = shuffleArray(allCandidates);
-    qualifierGroups = chunkArray(shuffled, 9);
+    qualifierGroups = chunkArray(shuffled, GROUP_SIZE);
     currentGroupIndex = 0;
     qualifierSelections = Array.from({ length: qualifierGroups.length }, () => []);
     showQualifierGroup();
@@ -284,40 +514,25 @@ function chunkArray(array, size) {
     document.getElementById('qualifier-title').innerText = `予選 (${currentGroupIndex + 1}/${qualifierGroups.length})`;
 
     const prevBtn = document.getElementById('prev-btn');
-    if (currentGroupIndex === 0) {
-      prevBtn.style.display = 'none';
-    } else {
-      prevBtn.style.display = 'inline-block';
-    }
+    prevBtn.style.display = (currentGroupIndex === 0) ? 'none' : 'inline-block';
 
     group.forEach(person => {
-      const cell = document.createElement('div');
-      cell.className = 'grid-cell';
+      const isSelected = selectedInGroup.some(p => p.id === person.id);
 
-      const img = document.createElement('img');
-      img.src = person.img;
-
-      if (selectedInGroup.some(p => p.id === person.id)) {
-        img.classList.add('selected');
-      }
-
-      img.onclick = () => {
-        if (img.classList.contains('selected')) {
-          img.classList.remove('selected');
-          selectedInGroup = selectedInGroup.filter(p => p.id !== person.id);
-        } else if (selectedInGroup.length < 4) {
-          img.classList.add('selected');
-          selectedInGroup.push(person);
+      const card = createCardElement(person, {
+        selected: isSelected,
+        onClick: (cardEl, p) => {
+          if (cardEl.classList.contains('selected')) {
+            cardEl.classList.remove('selected');
+            selectedInGroup = selectedInGroup.filter(item => item.id !== p.id);
+          } else if (selectedInGroup.length < 3) { // 最大3人制限
+            cardEl.classList.add('selected');
+            selectedInGroup.push(p);
+          }
         }
-      };
+      });
 
-      const nameLabel = document.createElement('div');
-      nameLabel.className = 'candidate-name';
-      nameLabel.innerText = person.name;
-
-      cell.appendChild(img);
-      cell.appendChild(nameLabel);
-      grid.appendChild(cell);
+      grid.appendChild(card);
     });
   }
 
@@ -339,7 +554,7 @@ function chunkArray(array, size) {
       passedQualifier = qualifierSelections.flat();
 
       if (passedQualifier.length < 9) {
-        document.getElementById('retry-message').innerText = `好き顔候補は${passedQualifier.length}人でした。`;
+        document.getElementById('retry-message').innerText = `選んだ人数は${passedQualifier.length}人でした。`;
         showScreen('retry-screen');
       } else {
         startTournament();
@@ -386,11 +601,20 @@ function chunkArray(array, size) {
     totalMatchesCount++;
     document.getElementById('match-count').innerText = `対戦数: ${totalMatchesCount}回目`;
     
-    document.getElementById('vs-left').src = candidateA.img;
-    document.getElementById('vs-left-name').innerText = candidateA.name;
+    const leftContainer = document.getElementById('vs-left-card');
+    const rightContainer = document.getElementById('vs-right-card');
 
-    document.getElementById('vs-right').src = candidateB.img;
-    document.getElementById('vs-right-name').innerText = candidateB.name;
+    leftContainer.innerHTML = '';
+    rightContainer.innerHTML = '';
+
+    const cardA = createCardElement(candidateA);
+    const cardB = createCardElement(candidateB);
+
+    leftContainer.appendChild(cardA.children[0]); // img
+    leftContainer.appendChild(cardA.children[0]); // info
+
+    rightContainer.appendChild(cardB.children[0]); // img
+    rightContainer.appendChild(cardB.children[0]); // info
 
     return new Promise(resolve => {
       resolvePromise = (selectedIndex) => {
@@ -410,44 +634,22 @@ function chunkArray(array, size) {
     
     const top9 = sortedList.slice(0, 9);
     top9.forEach((person, index) => {
-      const cell = document.createElement('div');
-      cell.className = 'result-cell';
-
-      const img = document.createElement('img');
-      img.src = person.img;
-
-      const badge = document.createElement('div');
-      badge.className = 'rank-badge';
-      badge.innerText = index + 1;
-
-      const nameLabel = document.createElement('div');
-      nameLabel.className = 'candidate-name';
-      nameLabel.innerText = person.name;
-
-      cell.appendChild(img);
-      cell.appendChild(badge);
-      cell.appendChild(nameLabel);
-      grid.appendChild(cell);
+      const card = createCardElement(person, {
+        badgeText: index + 1
+      });
+      grid.appendChild(card);
     });
 
-    const rank10Card = document.getElementById('rank-10-card');
-    rank10Card.innerHTML = '';
+    const rank10Container = document.getElementById('rank-10-card');
+    rank10Container.innerHTML = '';
+
     if (sortedList.length >= 10) {
       const person10 = sortedList[9];
-      const img = document.createElement('img');
-      img.src = person10.img;
-
-      const badge = document.createElement('div');
-      badge.className = 'rank-badge rank-10-badge';
-      badge.innerText = '10';
-
-      const nameLabel = document.createElement('div');
-      nameLabel.className = 'candidate-name';
-      nameLabel.innerText = person10.name;
-
-      rank10Card.appendChild(img);
-      rank10Card.appendChild(badge);
-      rank10Card.appendChild(nameLabel);
+      const card10 = createCardElement(person10, {
+        badgeText: '10',
+        badgeClass: 'badge-rank10'
+      });
+      rank10Container.appendChild(card10);
       document.getElementById('rank-10-section').style.display = 'block';
     } else {
       document.getElementById('rank-10-section').style.display = 'none';
