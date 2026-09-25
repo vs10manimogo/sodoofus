@@ -479,7 +479,7 @@
 
     const group = document.createElement('div');
     group.className = 'card-group';
-    group.innerText = person.group ? `#${person.group}` : '';
+    group.innerText = person.group ? person.group : '';
 
     info.appendChild(name);
     info.appendChild(group);
