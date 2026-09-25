@@ -69,23 +69,23 @@
       outline-offset: -1px;
     }
 
+    /* ピンクの丸型バッジ */
     .badge {
       position: absolute;
-      top: 16px;
-      left: 16px;
-      background: #7c4dff;
+      top: 10px;
+      left: 10px;
+      background: #ff6b9d;
       color: white;
       font-weight: bold;
-      font-size: 13px;
-      min-width: 24px;
-      height: 24px;
-      border-radius: 6px;
+      font-size: 14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
       z-index: 2;
-      padding: 0 4px;
     }
 
     /* ------------------------------------------
@@ -135,7 +135,7 @@
       width: 130px;
       margin: 15px auto 0;
     }
-    .badge-rank10 { background: #666; }
+    .badge-rank10 { background: #888888; }
 
     .error-box {
       background: #ffebee;
@@ -232,8 +232,6 @@
 <script>
   // ==========================================
   // 【名前とグループデータの設定】
-  // 実在するデータのみを定義してください（例: 1〜156名）
-  // 180名まで増やしたい場合は、ここに157〜180を追加するだけで自動拡張されます。
   // ==========================================
   const CANDIDATE_DATA = {
     1: { name: "ソンホ", group: "BOYNEXTDOOR" },
@@ -336,14 +334,66 @@
     98: { name: "ミニョク", group: "MONSTA X" },
     99: { name: "ジュホン", group: "MONSTA X" },
     100: { name: "IM", group: "MONSTA X" },
-    // 101〜156（または180名分まで設定可能）
+    101: { name: "ソンイル", group: "82MAJOR" },
+    102: { name: "ドギュン", group: "82MAJOR" },
+    103: { name: "ソンモ", group: "82MAJOR" },
+    104: { name: "ソクジュン", group: "82MAJOR" },
+    105: { name: "ソンビン", group: "82MAJOR" },
+    106: { name: "イェチャン", group: "82MAJOR" },
+    107: { name: "シオン", group: "NCT WISH" },
+    108: { name: "ユウシ", group: "NCT WISH" },
+    109: { name: "リョウ", group: "NCT WISH" },
+    110: { name: "サクヤ", group: "NCT WISH" },
+    111: { name: "ジェヒ", group: "NCT WISH" },
+    112: { name: "リク", group: "NCT WISH" },
+    113: { name: "ショウタロウ", group: "RIIZE" },
+    114: { name: "ソヒ", group: "RIIZE" },
+    115: { name: "ウンソク", group: "RIIZE" },
+    116: { name: "アントン", group: "RIIZE" },
+    117: { name: "ソンチャン", group: "RIIZE" },
+    118: { name: "ウォンビン", group: "RIIZE" },
+    119: { name: "カンダニエル", group: "" },
+    120: { name: "ライグァンリン", group: "" },
+    121: { name: "ペジニョン", group: "" },
+    122: { name: "ウジン", group: "AB6IX" },
+    123: { name: "デフィ", group: "AB6IX" },
+    124: { name: "ハソンウン", group: "" },
+    125: { name: "パクジフン", group: "" },
+    126: { name: "ユンジソン", group: "" },
+    127: { name: "オンソンウ", group: "" },
+    128: { name: "キムジェファン", group: "" },
+    129: { name: "ミニョン", group: "NU'EST" },
+    130: { name: "ハルト", group: "TREASURE" },
+    131: { name: "ジョンファン", group: "TREASURE" },
+    132: { name: "ドヨン", group: "TREASURE" },
+    133: { name: "アサヒ", group: "TREASURE" },
+    134: { name: "ヒョンソク", group: "TREASURE" },
+    135: { name: "ヨシ", group: "TREASURE" },
+    136: { name: "ジフン", group: "TREASURE" },
+    137: { name: "ジョンウ", group: "TREASURE" },
+    138: { name: "ジュンギュ", group: "TREASURE" },
+    139: { name: "ジェヒョク", group: "TREASURE" },
+    140: { name: "ヨンビン", group: "SF9" },
+    141: { name: "ユテヤン", group: "SF9" },
+    142: { name: "ダウォン", group: "SF9" },
+    143: { name: "チャニ", group: "SF9" },
+    144: { name: "フィヨン", group: "SF9" },
+    145: { name: "ロウン", group: "SF9" },
+    146: { name: "インソン", group: "SF9" },
+    147: { name: "ジェユン", group: "SF9" },
+    148: { name: "ジュホ", group: "SF9" },
+    149: { name: "ジェヒョン", group: "NCT 127" },
+    150: { name: "ドヨン", group: "NCT 127" },
+    151: { name: "ジェミン", group: "NCT DREAM" },
+    152: { name: "テヨン", group: "NCT 127" },
+    153: { name: "ユウタ", group: "NCT 127" },
+    154: { name: "ジョンウ", group: "NCT 127" },
+    155: { name: "ジャニ", group: "NCT 127" },
+    156: { name: "ヘチャン", group: "NCT 127/DREAM" },
   };
 
-  const GROUP_SIZE = 12; // 予選1画面あたりの人数
+  const GROUP_SIZE = 12;
 
-  // ==========================================
-  // CANDIDATE_DATA 内に実際に存在するデータのみを自動抽出する設計
-  // ==========================================
   const allCandidates = Object.keys(CANDIDATE_DATA)
     .map(Number)
     .sort((a, b) => a - b)
@@ -388,7 +438,6 @@
     document.getElementById(id).classList.add('active');
   }
 
-  // カード要素の生成関数（グループ名の先頭の#は除去済み）
   function createCardElement(person, options = {}) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -546,11 +595,11 @@
     const cardA = createCardElement(candidateA);
     const cardB = createCardElement(candidateB);
 
-    leftContainer.appendChild(cardA.children[0]); // img
-    leftContainer.appendChild(cardA.children[0]); // info
+    leftContainer.appendChild(cardA.children[0]);
+    leftContainer.appendChild(cardA.children[0]);
 
-    rightContainer.appendChild(cardB.children[0]); // img
-    rightContainer.appendChild(cardB.children[0]); // info
+    rightContainer.appendChild(cardB.children[0]);
+    rightContainer.appendChild(cardB.children[0]);
 
     return new Promise(resolve => {
       resolvePromise = (selectedIndex) => {
