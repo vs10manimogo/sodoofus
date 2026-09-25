@@ -17,7 +17,7 @@
     .active { display: block; }
     
     /* ------------------------------------------
-       共通カードスタイル（添付画像のデザインに統一）
+       共通カードスタイル
     ------------------------------------------ */
     .card {
       background: #ffffff;
@@ -26,7 +26,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
       display: flex;
       flex-direction: column;
-      align-items: center; /* 画像をセンター揃え */
+      align-items: center;
       box-sizing: border-box;
       position: relative;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -40,13 +40,13 @@
       width: 100%;
       aspect-ratio: 1;
       object-fit: cover;
-      border-radius: 10px; /* 画像のフチを丸く */
+      border-radius: 10px;
       display: block;
       background-color: #eee;
     }
     .card-info {
       width: 100%;
-      text-align: left; /* 名前とグループ名は左揃え */
+      text-align: left;
       margin-top: 8px;
       padding: 0 2px;
     }
@@ -64,18 +64,16 @@
       word-break: break-all;
     }
 
-    /* 選択時のハイライト枠線 */
     .card.selected {
       outline: 3.5px solid #ff6b9d;
       outline-offset: -1px;
     }
 
-    /* バッジ（画像左上の順位・選択マーク） */
     .badge {
       position: absolute;
       top: 16px;
       left: 16px;
-      background: #7c4dff; /* 紫ベースのカラー */
+      background: #7c4dff;
       color: white;
       font-weight: bold;
       font-size: 13px;
@@ -91,9 +89,8 @@
     }
 
     /* ------------------------------------------
-       画面ごとのレイアウト設定
+       画面レイアウト
     ------------------------------------------ */
-    /* 12人グリッド表示（予選用） */
     .grid-12 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -102,7 +99,6 @@
       margin: 20px auto;
     }
 
-    /* 本選 1対1 表示 */
     .vs-container {
       display: flex;
       justify-content: center;
@@ -121,7 +117,6 @@
       font-style: italic;
     }
 
-    /* 結果画面専用グリッド (9選) */
     .result-grid-9 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -130,7 +125,6 @@
       margin: 20px auto;
     }
 
-    /* 10位表示エリア */
     .rank-10-container {
       max-width: 480px;
       margin: 30px auto 10px;
@@ -143,7 +137,6 @@
     }
     .badge-rank10 { background: #666; }
 
-    /* エラー/警告表示 */
     .error-box {
       background: #ffebee;
       border: 1px solid #ffcdd2;
@@ -154,7 +147,6 @@
       margin: 20px auto;
     }
 
-    /* ボタン共通 */
     .button-group {
       display: flex;
       justify-content: center;
@@ -240,7 +232,8 @@
 <script>
   // ==========================================
   // 【名前とグループデータの設定】
-  // 1〜160番まで名前(name)とグループ(group)を設定してください
+  // 実在するデータのみを定義してください（例: 1〜156名）
+  // 180名まで増やしたい場合は、ここに157〜180を追加するだけで自動拡張されます。
   // ==========================================
   const CANDIDATE_DATA = {
     1: { name: "ソンホ", group: "BOYNEXTDOOR" },
@@ -343,81 +336,26 @@
     98: { name: "ミニョク", group: "MONSTA X" },
     99: { name: "ジュホン", group: "MONSTA X" },
     100: { name: "IM", group: "MONSTA X" },
-    101: { name: "ソンイル", group: "82MAJOR" },
-    102: { name: "ドギュン", group: "82MAJOR" },
-    103: { name: "ソンモ", group: "82MAJOR" },
-    104: { name: "ソクジュン", group: "82MAJOR" },
-    105: { name: "ソンビン", group: "82MAJOR" },
-    106: { name: "イェチャン", group: "82MAJOR" },
-    107: { name: "シオン", group: "NCT WISH" },
-    108: { name: "ユウシ", group: "NCT WISH" },
-    109: { name: "リョウ", group: "NCT WISH" },
-    110: { name: "サクヤ", group: "NCT WISH" },
-    111: { name: "ジェヒ", group: "NCT WISH" },
-    112: { name: "リク", group: "NCT WISH" },
-    113: { name: "ショウタロウ", group: "RIIZE" },
-    114: { name: "ソヒ", group: "RIIZE" },
-    115: { name: "ウンソク", group: "RIIZE" },
-    116: { name: "アントン", group: "RIIZE" },
-    117: { name: "ソンチャン", group: "RIIZE" },
-    118: { name: "ウォンビン", group: "RIIZE" },
-    119: { name: "カンダニエル", group: "" },
-    120: { name: "ライグァンリン", group: "" },
-    121: { name: "ペジニョン", group: "" },
-    122: { name: "ウジン", group: "AB6IX" },
-    123: { name: "デフィ", group: "AB6IX" },
-    124: { name: "ハソンウン", group: "" },
-    125: { name: "パクジフン", group: "" },
-    126: { name: "ユンジソン", group: "" },
-    127: { name: "オンソンウ", group: "" },
-    128: { name: "キムジェファン", group: "" },
-    129: { name: "ミニョン", group: "NU'EST" },
-    130: { name: "ハルト", group: "TREASURE" },
-    131: { name: "ジョンファン", group: "TREASURE" },
-    132: { name: "ドヨン", group: "TREASURE" },
-    133: { name: "アサヒ", group: "TREASURE" },
-    134: { name: "ヒョンソク", group: "TREASURE" },
-    135: { name: "ヨシ", group: "TREASURE" },
-    136: { name: "ジフン", group: "TREASURE" },
-    137: { name: "ジョンウ", group: "TREASURE" },
-    138: { name: "ジュンギュ", group: "TREASURE" },
-    139: { name: "ジェヒョク", group: "TREASURE" },
-    140: { name: "ヨンビン", group: "SF9" },
-    141: { name: "ユテヤン", group: "SF9" },
-    142: { name: "ダウォン", group: "SF9" },
-    143: { name: "チャニ", group: "SF9" },
-    144: { name: "フィヨン", group: "SF9" },
-    145: { name: "ロウン", group: "SF9" },
-    146: { name: "インソン", group: "SF9" },
-    147: { name: "ジェユン", group: "SF9" },
-    148: { name: "ジュホ", group: "SF9" },
-    149: { name: "ジェヒョン", group: "NCT 127" },
-    150: { name: "ドヨン", group: "NCT 127" },
-    151: { name: "ジェミン", group: "NCT DREAM" },
-    152: { name: "テヨン", group: "NCT 127" },
-    153: { name: "ユウタ", group: "NCT 127" },
-    154: { name: "ジョンウ", group: "NCT 127" },
-    155: { name: "ジャニ", group: "NCT 127" },
-    156: { name: "ヘチャン", group: "NCT 127/DREAM" },
-
-    // 
+    // 101〜156（または180名分まで設定可能）
   };
 
-  // 定数設定
-  const CANDIDATE_COUNT = 160; // 160人に拡張
-  const GROUP_SIZE = 12;        // 予選1画面に12人表示
+  const GROUP_SIZE = 12; // 予選1画面あたりの人数
 
-  // 候補者配列の生成
-  const allCandidates = Array.from({length: CANDIDATE_COUNT}, (_, i) => {
-    const id = i + 1;
-    const data = CANDIDATE_DATA[id] || { name: `メンバー ${id}`, group: `グループ ${id}` };
-    return {
-      id: id,
-      img: `images/${id}.jpg`,
-      name: data.name,
-      group: data.group
-    };
-  });
+  // ==========================================
+  // CANDIDATE_DATA 内に実際に存在するデータのみを自動抽出する設計
+  // ==========================================
+  const allCandidates = Object.keys(CANDIDATE_DATA)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .map(id => {
+      const data = CANDIDATE_DATA[id];
+      return {
+        id: id,
+        img: `images/${id}.jpg`,
+        name: data.name,
+        group: data.group
+      };
+    });
   
   let qualifierGroups = [];
   let currentGroupIndex = 0;
@@ -437,7 +375,6 @@
     return arr;
   }
 
-  // 配列を順方向に size 個ずつ分割する正しい処理
   function chunkArray(array, size) {
     const res = [];
     for (let i = 0; i < array.length; i += size) {
@@ -451,13 +388,12 @@
     document.getElementById(id).classList.add('active');
   }
 
-  // 共通のカード要素生成関数
+  // カード要素の生成関数（グループ名の先頭の#は除去済み）
   function createCardElement(person, options = {}) {
     const card = document.createElement('div');
     card.className = 'card';
     if (options.selected) card.classList.add('selected');
 
-    // バッジの追加（予選選択時や結果順位）
     if (options.badgeText) {
       const badge = document.createElement('div');
       badge.className = 'badge';
@@ -525,7 +461,7 @@
           if (cardEl.classList.contains('selected')) {
             cardEl.classList.remove('selected');
             selectedInGroup = selectedInGroup.filter(item => item.id !== p.id);
-          } else if (selectedInGroup.length < 3) { // 最大3人制限
+          } else if (selectedInGroup.length < 3) {
             cardEl.classList.add('selected');
             selectedInGroup.push(p);
           }
