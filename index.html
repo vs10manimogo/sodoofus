@@ -31,6 +31,7 @@
       position: relative;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
       cursor: pointer;
+      user-select: none;
     }
     .card:hover {
       transform: translateY(-2px);
@@ -96,6 +97,14 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       max-width: 480px;
+      margin: 20px auto;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      max-width: 360px;
       margin: 20px auto;
     }
 
@@ -168,7 +177,7 @@
     button.secondary { background: #757575; }
     button.secondary:hover { background: #616161; }
 
-    .sub-info { font-size: 14px; color: #666; }
+    .sub-info { font-size: 14px; color: #666; margin-top: 5px; }
   </style>
 </head>
 <body>
@@ -176,33 +185,40 @@
   <!-- 1. メイン画面 -->
   <div id="start-screen" class="screen active">
     <h1>好き顔9選</h1>
-    <button onclick="startQualifier()">スタート</button>
+    <button onclick="startQualifier1()">スタート</button>
   </div>
 
-  <!-- 2. 予選画面 -->
-  <div id="qualifier-screen" class="screen">
-    <h2 id="qualifier-title">予選</h2>
-    <p class="sub-info">好きな人を0~3人まで選んでください</p>
-    <div id="qualifier-grid" class="grid-12"></div>
+  <!-- 2. 予選1画面 -->
+  <div id="qualifier1-screen" class="screen">
+    <h2 id="qualifier1-title">予選1</h2>
+    <p class="sub-info">好きな人を0~3人選択してください</p>
+    <div id="qualifier1-grid" class="grid-12"></div>
     <div class="button-group">
-      <button id="prev-btn" class="secondary" onclick="prevQualifierGroup()">前へ</button>
-      <button id="next-btn" onclick="nextQualifierGroup()">次へ</button>
+      <button id="prev-btn" class="secondary" onclick="prevQualifier1Group()">前へ</button>
+      <button id="next-btn" onclick="nextQualifier1Group()">次へ</button>
     </div>
   </div>
 
-  <!-- 3. 予選やり直し画面 -->
+  <!-- 3. 予選1やり直し画面 -->
   <div id="retry-screen" class="screen">
-    <h2>予選結果</h2>
+    <h2>予選1結果</h2>
     <div class="error-box">
       <p id="retry-message" style="font-size: 18px; font-weight: bold;"></p>
       <p>本選に進むには9人以上選ぶ必要があります。</p>
     </div>
-    <button onclick="startQualifier()">予選をやり直す</button>
+    <button onclick="startQualifier1()">予選1をやり直す</button>
   </div>
 
-  <!-- 4. 本選画面 -->
+  <!-- 4. 予選2画面 -->
+  <div id="qualifier2-screen" class="screen">
+    <h2 id="qualifier2-title">予選2</h2>
+    <p class="sub-info">4人の中から最も好きな1人を選択してください</p>
+    <div id="qualifier2-grid" class="grid-4"></div>
+  </div>
+
+  <!-- 5. 本選画面（1:1トーナメント） -->
   <div id="tournament-screen" class="screen">
-    <h2>本選（順位決定戦）</h2>
+    <h2>本選</h2>
     <p class="sub-info">好きな方を選んでください</p>
     <div class="vs-container">
       <div id="vs-left-card" class="card" onclick="resolveMatch(0)"></div>
@@ -212,7 +228,7 @@
     <p id="match-count" class="sub-info">対戦数: 0回目</p>
   </div>
 
-  <!-- 5. 結果画面 -->
+  <!-- 6. 結果画面 -->
   <div id="result-screen" class="screen">
     <h2>あなたの好き顔9選</h2>
     <div id="result-grid" class="result-grid-9"></div>
@@ -223,7 +239,6 @@
       <div id="rank-10-card" class="rank-10-card"></div>
     </div>
 
-    <!-- 最初からやり直すボタン -->
     <div class="button-group" style="margin-top: 30px;">
       <button onclick="showScreen('start-screen')">最初からやり直す</button>
     </div>
@@ -231,7 +246,7 @@
 
 <script>
   // ==========================================
-  // 【名前とグループデータの設定】
+  // 【候補者データ】
   // ==========================================
   const CANDIDATE_DATA = {
     1: { name: "ソンホ", group: "BOYNEXTDOOR" },
@@ -390,6 +405,7 @@
     154: { name: "ジョンウ", group: "NCT 127" },
     155: { name: "ジャニ", group: "NCT 127" },
     156: { name: "ヘチャン", group: "NCT 127/DREAM" },
+
   };
 
   const GROUP_SIZE = 12;
@@ -406,12 +422,17 @@
         group: data.group
       };
     });
-  
-  let qualifierGroups = [];
+
+  // 状態管理
+  let qualifier1Groups = [];
   let currentGroupIndex = 0;
-  let qualifierSelections = [];
+  let qualifier1Selections = [];
   let selectedInGroup = [];
-  let passedQualifier = [];
+  let passedQualifier1 = [];
+
+  let q2Pool = []; // 予選2用スコアプール
+  let q2CurrentRound = 0;
+  let q2TotalRounds = 0;
 
   let resolvePromise = null;
   let totalMatchesCount = 0;
@@ -479,24 +500,26 @@
     return card;
   }
 
-  // --- 予選処理 ---
-  function startQualifier() {
+  // ==========================================
+  // 【1. 予選1 処理】
+  // ==========================================
+  function startQualifier1() {
     const shuffled = shuffleArray(allCandidates);
-    qualifierGroups = chunkArray(shuffled, GROUP_SIZE);
+    qualifier1Groups = chunkArray(shuffled, GROUP_SIZE);
     currentGroupIndex = 0;
-    qualifierSelections = Array.from({ length: qualifierGroups.length }, () => []);
-    showQualifierGroup();
-    showScreen('qualifier-screen');
+    qualifier1Selections = Array.from({ length: qualifier1Groups.length }, () => []);
+    showQualifier1Group();
+    showScreen('qualifier1-screen');
   }
 
-  function showQualifierGroup() {
-    selectedInGroup = [...qualifierSelections[currentGroupIndex]];
+  function showQualifier1Group() {
+    selectedInGroup = [...qualifier1Selections[currentGroupIndex]];
     
-    const grid = document.getElementById('qualifier-grid');
+    const grid = document.getElementById('qualifier1-grid');
     grid.innerHTML = '';
-    const group = qualifierGroups[currentGroupIndex];
+    const group = qualifier1Groups[currentGroupIndex];
     
-    document.getElementById('qualifier-title').innerText = `予選 (${currentGroupIndex + 1}/${qualifierGroups.length})`;
+    document.getElementById('qualifier1-title').innerText = `予選1 (${currentGroupIndex + 1}/${qualifier1Groups.length})`;
 
     const prevBtn = document.getElementById('prev-btn');
     prevBtn.style.display = (currentGroupIndex === 0) ? 'none' : 'inline-block';
@@ -521,39 +544,108 @@
     });
   }
 
-  function prevQualifierGroup() {
-    qualifierSelections[currentGroupIndex] = [...selectedInGroup];
+  function prevQualifier1Group() {
+    qualifier1Selections[currentGroupIndex] = [...selectedInGroup];
     if (currentGroupIndex > 0) {
       currentGroupIndex--;
-      showQualifierGroup();
+      showQualifier1Group();
     }
   }
 
-  function nextQualifierGroup() {
-    qualifierSelections[currentGroupIndex] = [...selectedInGroup];
+  function nextQualifier1Group() {
+    qualifier1Selections[currentGroupIndex] = [...selectedInGroup];
     currentGroupIndex++;
 
-    if (currentGroupIndex < qualifierGroups.length) {
-      showQualifierGroup();
+    if (currentGroupIndex < qualifier1Groups.length) {
+      showQualifier1Group();
     } else {
-      passedQualifier = qualifierSelections.flat();
+      passedQualifier1 = qualifier1Selections.flat();
+      const count = passedQualifier1.length;
 
-      if (passedQualifier.length < 9) {
-        document.getElementById('retry-message').innerText = `選んだ人数は${passedQualifier.length}人でした。`;
+      if (count < 9) {
+        // 8人以下: やり直し
+        document.getElementById('retry-message').innerText = `選んだ人数は${count}人でした。`;
         showScreen('retry-screen');
+      } else if (count <= 12) {
+        // 9~12人: 予選2をスキップしてそのまま本選へ
+        startTournament(passedQualifier1);
       } else {
-        startTournament();
+        // 13人以上: 予選2（マルチチョイス）へ進む
+        startQualifier2(passedQualifier1);
       }
     }
   }
 
-  // --- 本選処理 ---
-  async function startTournament() {
+  // ==========================================
+  // 【2. 予選2 処理（4人マルチチョイス）】
+  // ==========================================
+  function startQualifier2(candidates) {
+    // スコア管理用オブジェクト初期化
+    q2Pool = candidates.map(c => ({
+      person: c,
+      score: 0,
+      appearances: 0
+    }));
+
+    // ラウンド数の設定（全員が平均2~3回登場するように設定）
+    q2TotalRounds = Math.max(12, Math.ceil((candidates.length * 2.5) / 4));
+    q2CurrentRound = 0;
+
+    showScreen('qualifier2-screen');
+    nextQualifier2Round();
+  }
+
+  function nextQualifier2Round() {
+    if (q2CurrentRound >= q2TotalRounds) {
+      // 予選2終了：スコア上位12名を本選へ
+      // スコアで降順ソート（同点時はランダム）
+      q2Pool.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return Math.random() - 0.5;
+      });
+
+      const top12 = q2Pool.slice(0, 12).map(item => item.person);
+      startTournament(top12);
+      return;
+    }
+
+    q2CurrentRound++;
+    document.getElementById('qualifier2-title').innerText = `予選2 (${q2CurrentRound}/${q2TotalRounds})`;
+
+    // 出現回数が少ないメンバーを優先して4名選出
+    const sortedByApp = [...q2Pool].sort((a, b) => {
+      if (a.appearances !== b.appearances) return a.appearances - b.appearances;
+      return Math.random() - 0.5;
+    });
+
+    const roundFour = shuffleArray(sortedByApp.slice(0, 8)).slice(0, 4);
+
+    // 出現回数を加算
+    roundFour.forEach(item => item.appearances++);
+
+    const grid = document.getElementById('qualifier2-grid');
+    grid.innerHTML = '';
+
+    roundFour.forEach(item => {
+      const card = createCardElement(item.person, {
+        onClick: () => {
+          item.score += 1; // 勝ち点加算
+          nextQualifier2Round();
+        }
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  // ==========================================
+  // 【3. 本選 処理（マージソルト）】
+  // ==========================================
+  async function startTournament(finalists) {
     totalMatchesCount = 0;
     document.getElementById('match-count').innerText = `対戦数: 0回目`;
     showScreen('tournament-screen');
 
-    const sortedList = await mergeSort([...passedQualifier]);
+    const sortedList = await mergeSort([...finalists]);
     showResult(sortedList);
   }
 
@@ -612,7 +704,9 @@
     if (resolvePromise) resolvePromise(side);
   }
 
-  // --- 結果表示 ---
+  // ==========================================
+  // 【4. 結果表示】
+  // ==========================================
   function showResult(sortedList) {
     const grid = document.getElementById('result-grid');
     grid.innerHTML = '';
